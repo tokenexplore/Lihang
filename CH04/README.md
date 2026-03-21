@@ -5,37 +5,54 @@
 
 ## 前言
 
-### 章节目录
-
-1. 朴素贝叶斯法的学习与分类
-   1. 基本方法
-   1. 后验概率最大化的含义
-1. 朴素贝叶斯法的参数估计
-   1. 极大似然估计
-   1. 学习与分类算法
-   1. 贝叶斯估计
-
 ### 导读
 
 - 书中讲解的生成模型不多，生成模型学习联合概率分布，NB是典型的生成模型，与之对应的判别模型，是逻辑回归可以参考[CH06](../CH06/README.md)
-
-- **0-1损失函数**时的期望风险最小化
-
 - 给定数据集的时候，我们能知道不同类别的分布，这个很好统计的量叫**先验**$P(Y=c_k)$
 
   - 垃圾邮件识别可以用朴素贝叶斯的方法
 
 - NB是常见的概率图模型之一[^4]。最简单的概率图模型，有向图。概率图模型是执行贝叶斯推理的主流工具。
   ![nb_pgm](../CH04/assets/nb_pgm.png)
-  这个图中， $y$是输出变量，$x$是输入变量，是观测变量。生成模型直接描述了输出以多大的概率生成输入。在图模型里，**已知观测是灰色的，未知变量是白色的**。
+  这个图中， $y$ 是输出变量，$x$ 是输入变量，是观测变量。生成模型直接描述了输出以多大的概率生成输入。在图模型里，**已知观测是灰色的，未知变量是白色的**。
 
 - 第一个参考文献[^1]，这里推荐阅读，链接中的手稿在2017年还有更新，开头部分介绍了很多符号的定义，可以配合[CH01](../CH01/README.md)的内容来理解。讲述了生成模型和判别模型，朴素贝叶斯和逻辑回归
 
 - 另外在讲到CRF的时候，也有对比贝叶斯和逻辑回归，可以在[CH11](../CH11/README.md)的时候再回顾这里。
 
 
-
 ## 朴素贝叶斯法
+
+<span style='color:red'>NB是基于贝叶斯定理与特征 条件独立 假设的分类方法</span>
+
+- 首先基于特征条件独立假设学习输入输出的联合概率分布
+- 然后基于此模型，对给定的输入x，利用贝叶斯定理求出最大后验概率最大的输出y
+
+### 基本方法
+- 输入空间：所有可能的 $n$ 维特征向量组成的集合，通常是 $\mathbb{R}^n$ 的子集
+$$
+\mathcal{X} \subseteq \mathbb{R}^n, \quad x \in \mathcal{X}
+$$
+- 输出空间：类别标签的有限集合
+$$
+\quad \mathcal{Y} = \{c_1, c_2, \dots, c_K\}, \quad y \in \mathcal{Y}
+$$
+
+**简答说明：**
+- **输入 $x$**：一个具体的 $n$ 维特征向量（样本）。
+- **输出 $y$**：对应于 $x$ 的类别标签。
+- **随机变量 $X, Y$**：分别表示从输入空间和输出空间中按联合分布 $P(X,Y)$ 抽取的随机向量和随机变量。
+- **训练数据集 $T$**：由 $N$ 个独立同分布（i.i.d.）样本 $(x_i, y_i)$ 组成，来自联合分布 $P(X,Y)$。
+
+- **先验概率分布**：
+$$ 
+P(Y=c_k),k = 1,2,...K
+$$
+- **条件概率分布**：
+$$
+P ( X=x|Y=c_{k}) = P(X^{(1)} = x^{(1)}, \cdots, X^{(n)}=x^{(n)}|Y=c_{ k}) ,\quad k = 1 , 2 , \cdots , K
+$$
+- 根据先验概率和条件概率学习到联合概率 $P(X,Y)$
 
 ### 参数数量
 
@@ -63,12 +80,9 @@
 
 **independent and identically distributed** (*i.i.d.* or *iid* or **IID**)
 
-求$P(Y|X)$，其中$X\in\{X_1,X_2,\dots,X_n\}$，条件独立假设这里给定$Y$的情况下：
+求$P(Y|X)$，其中$X\in\{X_1,X_2,\dots,X_n\}$，<span style='color:red'>条件独立假设等于是说用于分类的**特征**在**类确定**的条件下都是**条件独立**的。</span>
 
-1. 每一个$X_i$和其他的每个$X_k$是条件独立的
-1. 每一个$X_i$和其他的每个$X_k$的子集是条件独立的
-
-条件独立性假设是:
+公式表示是:
 $$
 \begin{align}
 P(X=x|Y=c_k)&=P(X^{(1)},\dots,X^{(n)}|Y=c_k)\\
@@ -83,15 +97,9 @@ P(X|Y)&=P(X_1,X_2|Y)\\
 &=\color{red}P(X_1|Y)\color{black}P(X_2|Y)
 \end{aligned}
 $$
-红色部分从上到下基于IID
-
-条件独立假设等于是说用于分类的**特征**在**类确定**的条件下都是**条件独立**的。
-
-
+红色部分从上到下基于 iid
 
 ## 参数估计
-
-### 极大似然估计
 
 > 为了估计状态变量的条件分布，利用贝叶斯法则，有
 > $$
@@ -100,16 +108,50 @@ $$
 > 其中$P(X|Y)$为给定$Y$下$X$的后验概率(Posterior)， $P(Y|X)$称为似然(Likelyhood)，$P(X)$称为先验(Prior)[^1]。
 >
 
+学习意味着估计 $P(Y=c_k)$ 和 $P(X^{(j)}=x^{(j)}|Y=c_k)$
+
+### 极大似然估计
+先验 $P(Y=c_k)$ 的MLE为：
+$$
+P(Y = c_k) = \frac{\sum_{i=1}^{N} I(y_i = c_k)}{N}, \quad k = 1, 2, \cdots, K
+$$
+
+条件概率的MLE为：
+![alt text](./assets/map1.png)
+
 - 后验概率最大化的含义
 
-  朴素贝叶斯法将实例分到**后验概率最大的类**中， 这等价于**期望风险最小化**。
+  <span style='color:red'>朴素贝叶斯法将实例分到**后验概率最大的类**中， 这等价于**期望风险最小化**。</span>
 
 - 后验，观察到$Y$之后，对$X$的信念
 
-### 贝叶斯估计
+### 学习与分类
 
-对于$x$的某个特征的取值没有在先验中出现的情况 ，如果用极大似然估计，这种情况的可能性就是0。
-但是出现这种情况的原因通常是因为数据集不能全覆盖样本空间，出现未知的情况处理的策略就是做平滑。
+NB进行分类时，对给定的输入x，通过学习到的模型计算后验概率分布 $P(Y=c_k|X=x)$，将后验概率最大的类作为 $x$ 的类输出。
+
+贝叶斯定理：
+$$
+P(Y = c_k | X = x) = \frac{P(X = x | Y = c_k) P(Y = c_k)}{\sum_{k} P(X = x | Y = c_k) P(Y = c_k)} \\
+$$
+
+分类器表示：
+$$
+y = f(x) = \arg\max_{c_k} \frac{P(Y = c_k) \prod_j P(X^{(j)} = x^{(j)} | Y = c_k)}{\sum_k P(Y = c_k) \prod_j P(X^{(j)} = x^{(j)} | Y = c_k)}
+$$
+
+注意到分母对所有的 $c_k$ 都是相同的
+$$
+y = \arg\max_{c_k} P(Y = c_k) \prod_j P(X^{(j)} = x^{(j)} | Y = c_k)
+$$
+
+
+
+---
+### 贝叶斯估计
+对于 $x$ 的某个特征的取值没有在先验中出现的情况 ，如果用极大似然估计，这种情况的可能性就是0。
+
+但是出现这种情况的原因通常是因为数据集不能全覆盖样本空间，<span style='color:red'>出现未知的情况处理的策略就是做平滑，进行贝叶斯估计</span>。
+
 公式(4.10)对应了出现未知样本的情况下，该给出一个什么样的值才合理的方案。
 $$
 P_{\lambda}(X^{(j)}=a_{jl}|Y=c_k)=\frac{\sum\limits_{i=1}^NI(x_i^{j}=a_{jl},y_j=c_k)+\lambda}{\sum\limits_{i=1}^NI(y_j=c_k)+S_j\lambda}
@@ -143,7 +185,7 @@ $$
 
 ### 树增强朴素贝叶斯
 
-IID强限制放宽，就是TAN(Tree Augmented Naive Bayes)。可以看做是NB到贝叶斯网的过渡。
+iid 强限制放宽，就是TAN(Tree Augmented Naive Bayes)。可以看做是NB到贝叶斯网的过渡。
 
 ### 贝叶斯网
 
@@ -167,12 +209,12 @@ IID强限制放宽，就是TAN(Tree Augmented Naive Bayes)。可以看做是NB�
 
 ## 参考
 
-1. [^1]: [视觉SLAM十四讲, 高翔](## 参考)
+[视觉SLAM十四讲, 高翔](## 参考)
 
-2. [^2]: [Generative and discriminative classifiers: Naive Bayes and logistic regression](http://www.cs.cmu.edu/~tom/mlbook/NBayeslogReg.pdf)
+[Generative and discriminative classifiers: Naive Bayes and logistic regression](http://www.cs.cmu.edu/~tom/mlbook/NBayeslogReg.pdf)
 
-3. [^3]: [Machine Learning New Chapter](http://www.cs.cmu.edu/~tom/NewChapters.html)
+[Machine Learning New Chapter](http://www.cs.cmu.edu/~tom/NewChapters.html)
 
-4. [^4 ]: [An Introduction to Conditional Random Fields for Relational Learning](-)
+[An Introduction to Conditional Random Fields for Relational Learning](-)
 
 **[⬆ top](#导读)**
