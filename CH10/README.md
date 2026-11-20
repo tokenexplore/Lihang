@@ -283,73 +283,73 @@ $$
 
 前向算法计算 $P(O|\lambda)$ 的复杂度是 $O(N^2T)$ 阶的，直接计算的复杂度是 $O(TN^T)$ 阶，所以 $T=2$ 时候并没什么改善。
 
-红色部分为后补充了 $\beta_T(i)$ 项，这项为1,此处注意和后面的后向概率对比。
 
-
-#### 后向概率
+#### 后向算法
 **后向概率**
 
-给定马尔可夫模型 $\lambda$, 定义到时刻 $t$ 状态为 $q_i$ 的条件下, 从 $t+1$ 到 $T$ 的部分观测序列为 $o_{t+1}, o_{t+2}, \dots ,o_T$的概率为**后向概率**, 记作
+给定马尔可夫模型 $\lambda$, 定义在时刻 $t$ 状态为 $q_i$ 的条件下, 从 $t+1$ 到 $T$ 的部分观测序列为 $o_{t+1}, o_{t+2}, \dots ,o_T$ 的概率为**后向概率**, 记作
 $$
 \beta_t(i)=P(o_{t+1},o_{t+2},\dots,o_T|i_t=q_i, \lambda)
 $$
-$\color{red} 关于\alpha 和\beta 这两个公式,  仔细看下, 细心理解.$ 前向概率从前往后递推， 后向概率从后向前递推。
+
+$\color{red}$ 关于 $\alpha$ 和 $\beta$ 这两个公式, 仔细看下, 细心理解前向概率从前往后递推， 后向概率从后向前递推。
 
 **后向算法**
+- 输入: $\lambda , O$
+- 输出:$P(O|\lambda)$
 
-> 输入: $\lambda , O$
-> 输出:$P(O|\lambda)$
-> 
-> 1. 终值
-> $$
-> \beta_T(i)=1, i=1,2,\dots,N
-> $$
-> 在$t=T$时刻, 观测序列已经确定.
-> 
-> 2. 递推
-> $$
-> \color{red}\beta_t(i)=\sum\limits_{j=1}^Na_{ij}b_j(o_{t+1})\beta_{t+1}(j)\color{black}, i=1,2,\dots,N, t=T-1, T-2,\dots,1
-> $$
-> 从后往前推
->  $\beta = ABo\beta = N \times N \times N \times M \times M \times N \times N \times 1 = N \times 1$
->
-> 3. 
->
-> $$
-> P(O|\lambda)=\sum\limits_{i=1}^N\pi_ib_i(o_1)\beta_1(i)=\color{red}\sum\limits_{i=1}\alpha_1(i)\beta_1(i)
-> $$
->
+1. 终值
+$$
+\beta_T(i)=1, i=1,2,\dots,N
+$$
+在$t=T$时刻, 观测序列已经确定.
+ 
+2. 递推
+$$
+\color{red}\beta_t(i)=\sum\limits_{j=1}^Na_{ij}b_j(o_{t+1})\beta_{t+1}(j)\color{black}, i=1,2,\dots,N, t=T-1, T-2,\dots,1
+$$
+
+从后往前推
+ $\beta = ABo\beta = N \times N \times N \times M \times M \times N \times N \times 1 = N \times 1$
+
+3. 
+$$
+P(O|\lambda)=\sum\limits_{i=1}^N\pi_ib_i(o_1)\beta_1(i)=\color{red}\sum\limits_{i=1}\alpha_1(i)\beta_1(i)
+$$
 
 - 这里需要**注意**下，按照后向算法，$\beta$在递推过程中会越来越小，如果层数较多，怕是$P(O|\lambda)$会消失
-- 另外一个要注意的点$\color{red}o_{t+1}\beta_{t+1}$
+- 另外一个要注意的点 $\color{red}o_{t+1}\beta_{t+1}$
 - 注意，红色部分为后补充，结合前面的前向概率最后的红色部分一起理解。
+
+![alt text](./assets/hmm_backward.png)
 
 ##### 小结
 
+求解的都是**观测序列概率**
 
->求解的都是**观测序列概率**
->观测序列概率$P(O|\lambda)$统一写成
->$$
->P(O|\lambda)=\sum_{i=1}^N\sum_{j=1}^N\alpha_t(i)a_{ij}b_j(o_{t+1}\beta_{t+1}(j)),\ t=1,2,\dots,T-1
->$$
->
->$P(O|\lambda) = \alpha ABo\beta$
+观测序列概率$P(O|\lambda)$统一写成
+$$
+P(O|\lambda)=\sum_{i=1}^N\sum_{j=1}^N\alpha_t(i)a_{ij}b_j(o_{t+1}\beta_{t+1}(j)),\ t=1,2,\dots,T-1
+$$
 
-其实前向和后向不是为了求整个序列$O$的概率，是为了求中间的某个点$t$，前向后向主要是有这个关系:
+$P(O|\lambda) = \alpha ABo\beta$
+
+其实前向和后向不是为了求整个序列 $O$ 的概率，是为了求中间的某个点 $t$，前向后向主要是有这个关系:
 $$
 \alpha_t(i)\beta_t(i)=P(i_t=q_i,O|\lambda)
 $$
+
 当$t=1$或者$t=T-1$的时候，单独用后向和前向就可以求得$P(O|\lambda)$，分别利用前向和后向算法均可以求解$P(O|\lambda)$，结果一致。
 
 利用上述关系可以得到下面一些概率和期望，这些概率和期望的表达式在后面估计模型参数的时候有应用。
 
 **概率与期望**
 
-1. 输入模型$\lambda$与观测$O$，输出在时刻$t$处于状态$q_i$的概率$\gamma_t(i)$
-1. 输入模型$\lambda$与观测$O$，输出在时刻$t$处于状态$q_i$且在时刻$t+1$处于状态$q_j$的概率$\xi_t(i,j)$
-1. 在观测$O$下状态$i$出现的期望值
-1. 在观测$O$下状态$i$转移的期望值
-1. 在观测$O$下状态$i$转移到状态$j$的期望值
+1. 输入模型 $\lambda$ 与观测 $O$，输出在时刻 $t$ 处于状态 $q_i$ 的概率 $\gamma_t(i)$
+2. 输入模型 $\lambda$ 与观测 $O$，输出在时刻 $t$ 处于状态 $q_i$ 且在时刻 $t+1$ 处于状态 $q_j$ 的概率 $\xi_t(i,j)$
+3. 在观测 $O$ 下状态 $i$ 出现的期望值
+4. 在观测 $O$ 下状态 $i$ 转移的期望值
+5. 在观测 $O$ 下状态 $i$ 转移到状态 $j$ 的期望值
 
 #### 监督学习方法
 
@@ -361,7 +361,8 @@ $$
 $$
 P(O|\lambda)=\sum\limits_IP(O|I,\lambda)P(I|\lambda)
 $$
-关于EM算法可以参考[第九章](../CH09/README.md), 对隐变量求期望, $Q$函数极大化
+
+关于EM算法可以参考[第九章](../CH09/README.md), 对隐变量求期望, $Q$ 函数极大化
 
 > 输入: 观测数据$O=(o_1, o_2, \dots, o_T)$
 >

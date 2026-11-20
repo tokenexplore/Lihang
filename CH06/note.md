@@ -248,9 +248,7 @@ $$
 $$
 \sum_{i=1}^n p_i \left( - \ln \frac{p_i}{q_i} \right) \leq 0
 $$
-$$
-- \sum_{i=1}^n p_i \ln \frac{p_i}{q_i} \leq 0
-$$
+
 两边同乘 $-1$（不等号方向改变）：
 $$
 \sum_{i=1}^n p_i \ln \frac{p_i}{q_i} \geq 0

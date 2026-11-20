@@ -1,5 +1,6 @@
 # CH04 朴素贝叶斯法
-![Hits](https://www.smirkcao.info/hit_gits/Lihang/CH04/README.md)
+
+[Hits](https://www.smirkcao.info/hit_gits/Lihang/CH04/README.md)
 
 [TOC]
 
@@ -157,6 +158,11 @@ $$
 P_{\lambda}(X^{(j)}=a_{jl}|Y=c_k)=\frac{\sum\limits_{i=1}^NI(x_i^{j}=a_{jl},y_j=c_k)+\lambda}{\sum\limits_{i=1}^NI(y_j=c_k)+S_j\lambda}
 $$
 
+相应的，先验概率
+$$
+ P_\lambda(Y = c_k) = \frac{\sum_{i=1}^N I(y_i = c_k) + \lambda}{N + K\lambda} 
+$$
+
 
 其中$\lambda \geqslant 0$
 
@@ -171,7 +177,6 @@ $$
 这个例子，有两个特征，一个标签，我们看看通过已知的数据表4.1能拿到哪些计算结果
 
 1. 先验Prior，通过统计$Y$的数据分布可以知道
-
 2. 不同$X$和$Y$的组合会产生多少参数，$X^{(1)}$可能的取值集合$A_1=\{1,2,3\}$大小为$S_1=3$，$X^{(2)}$可能的取值集合$A_2=\{S,M,L\}$大小为$S_2=3$，$Y\in C=\{1,-1\}$大小为$K=2$
    参数的数量为$KS_1S_2=18$，具体的空间的分布是一个$3\times 3\times2$的三维矩阵
 2. 每个特征的增加，本来应该在原来的$Y，X$的基础上增加$S_i$倍的维度，但因为做了特征条件独立假设，增加的可能性，是base在给定的标签$Y$上的，也就是说实际上增加了$S_i$个取值
